@@ -1,6 +1,11 @@
 # RustDeck
 
-A [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader) plugin that runs [RustDesk](https://github.com/rustdesk/rustdesk) on the Steam Deck in Game Mode, so other devices can see and control the Deck while you play, with no keyboard or desktop session needed on the Deck itself.
+**RustDeck** is a [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader) plugin for running **[RustDesk](https://github.com/rustdesk/rustdesk)**, the open-source remote desktop app, on the Steam Deck in Game Mode. Other devices can then see and control the Deck while you play, with no keyboard or desktop session needed on the Deck itself.
+
+The two names differ by one letter:
+
+- **RustDeck** is this plugin: the quick access panel, the settings pages, and the backend that installs and manages RustDesk.
+- **RustDesk** is the remote desktop app. The plugin installs a build of it made for the Deck and runs it as a service. You connect with the RustDesk app on your other devices.
 
 ![Overview](assets/screenshots/overview.png)
 
@@ -18,18 +23,19 @@ A [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader) plugin that 
 
 ## Features
 
-- **One-press install** — downloads a RustDesk build made for the Deck (see [RustDesk build](#rustdesk-build)), checks its SHA-256 and installs it without touching the read-only system image. Updates and removal work the same way.
-- **Quick access panel** — whether RustDesk is waiting or someone is connected, the ID and temporary password, a new password on demand, remote access on/off and *Disconnect everyone*.
-- **Full-screen settings** — L1/R1 switch between:
+
+- **One-press install.** Downloads a RustDesk build made for the Deck (see [RustDesk build](#rustdesk-build)), checks its SHA-256 and installs it without touching the read-only system image. Updates and removal work the same way.
+- **Quick access panel.** Shows whether RustDesk is waiting or someone is connected, with the ID and temporary password, and buttons for a new password, remote access on/off and *Disconnect everyone*.
+- **Full-screen settings.** Six pages, switched with L1/R1:
   - **Overview**: status, ID and password, connections, capture method, composition state and server at a glance.
   - **Security**: verification method (temporary, permanent or either), temporary password length, permanent password, IP whitelist. Warns when only a permanent password is accepted but none is set, which would lock everyone out.
   - **Permissions**: what a connected device may do (keyboard and mouse, clipboard, file transfer, audio, remote restart, session recording).
   - **Network**: import a self-hosted server's configuration string or go back to the public servers, LAN discovery, direct IP access.
   - **Capture**: DRM capture (default) or gamescope's screen stream (experimental), and forced composition while connected.
   - **About**: version, update check, opening RustDesk's own window, uninstall.
-- **RustDesk's own window** — opens in Game Mode through a non-Steam shortcut the plugin creates. The shortcut is hidden from the library, gets RustDesk artwork, and starts RustDesk in Steam's UI language.
-- **Starts with the Deck** — with remote access on, RustDesk comes back after a reboot. Reloading the plugin does not drop a session.
-- **Gamepad first** — every page is navigable with the d-pad.
+- **RustDesk's own window.** Opens in Game Mode through a non-Steam shortcut the plugin creates. The shortcut is hidden from the library, gets RustDesk artwork, and starts RustDesk in Steam's UI language.
+- **Starts with the Deck.** With remote access on, RustDesk comes back after a reboot. Reloading the plugin does not drop a session.
+- **Gamepad first.** Every page is navigable with the d-pad.
 
 ## Requirements
 
@@ -42,9 +48,9 @@ A [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader) plugin that 
 1. Download the plugin zip from the latest [release](https://github.com/Hintay/decky-rustdeck/releases).
 2. In Decky, turn on *Settings → General → Developer mode*.
 3. Open *Settings → Developer → Install Plugin from ZIP File* and pick the zip.
-4. Open RustDeck in the quick access menu and press *Install RustDesk*, then turn on remote access.
+4. Open the RustDeck plugin in the quick access menu and press *Install RustDesk*, then turn on remote access.
 
-To connect, open RustDesk on another device and enter the ID and password shown in the plugin.
+To connect, open the RustDesk app on another device and enter the ID and password shown in RustDeck.
 
 ## How it works
 
@@ -72,7 +78,7 @@ The plugin installs `rustdesk-unattended-wayland` from the `deck-*` releases of 
 
 ## Uninstall
 
-*About → Uninstall RustDesk* stops RustDesk and removes it from the system. Uninstalling the plugin does the same. RustDesk's own configuration, with its ID and passwords, is kept, so a reinstall keeps the same ID.
+*About → Uninstall RustDesk* stops RustDesk and removes it from the system while keeping the plugin. Uninstalling the RustDeck plugin removes RustDesk too. RustDesk's own configuration, with its ID and passwords, is kept, so a reinstall keeps the same ID.
 
 ## Development
 
