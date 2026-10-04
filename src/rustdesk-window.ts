@@ -1,7 +1,7 @@
 // Open RustDesk's own window in Game Mode. gamescope only shows apps Steam launched, so the
 // window is started through a non-Steam shortcut the plugin creates once and then reuses. The
 // shortcut is hidden from the library and given artwork for the "now playing" views.
-import { getArtwork, getShortcut, setArtworkApplied, setShortcut } from "./backend";
+import { getArtwork, getShortcut, installShortcutIcon, setArtworkApplied, setShortcut } from "./backend";
 import { t } from "./i18n";
 import { toast } from "./toast";
 
@@ -10,7 +10,6 @@ declare const appStore: any;
 declare const collectionStore: any;
 
 const EXE = "/usr/bin/rustdesk";
-const ICON = "/usr/share/icons/hicolor/256x256/apps/rustdesk.png";
 // Steam's custom artwork slots.
 const ASSET_TYPES = { grid_p: 0, hero: 1, logo: 2, grid_l: 3 } as const;
 
@@ -36,7 +35,9 @@ async function applyArtwork(appId: number): Promise<void> {
   for (const [name, type] of Object.entries(ASSET_TYPES)) {
     await SteamClient.Apps.SetCustomArtworkForApp(appId, art[name as keyof typeof ASSET_TYPES], "png", type);
   }
-  SteamClient.Apps.SetShortcutIcon(appId, ICON);
+  // After the artwork, which creates the grid folder the icon is copied into.
+  const icon = await installShortcutIcon(appId);
+  if (icon) SteamClient.Apps.SetShortcutIcon(appId, icon);
   await setArtworkApplied(appId);
 }
 

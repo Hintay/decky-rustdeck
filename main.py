@@ -1,7 +1,10 @@
 import asyncio
 import base64
+import glob
+import hashlib
 import json
 import os
+import shutil
 from dataclasses import asdict
 
 import decky  # type: ignore
@@ -16,11 +19,13 @@ DEFAULTS = {
     "auto_composite": True,
     # Capture through gamescope's ScreenCast portal instead of DRM (experimental).
     "prefer_portal": False,
-    # Steam shortcut used to open RustDesk's own window, and the one its artwork was applied to.
+    # Steam shortcut used to open RustDesk's own window, and "appid:artwork hash" last applied to it.
     "shortcut_appid": None,
     "shortcut_artwork": None,
 }
 ARTWORK_DIR = os.path.join(decky.DECKY_PLUGIN_DIR, "assets", "artwork")
+ARTWORK = ("grid_p", "grid_l", "hero", "logo")
+ICON = "/usr/share/icons/hicolor/256x256/apps/rustdesk.png"
 WATCH_INTERVAL = 2.0
 
 
@@ -270,11 +275,23 @@ class Plugin:
 
     # ---- RustDesk window ----
 
+    def _artwork_stamp(self) -> str | None:
+        """Which shortcut got which artwork, so changed artwork is applied again."""
+        appid = self.settings["shortcut_appid"]
+        if appid is None:
+            return None
+        digest = hashlib.sha256()
+        for path in [os.path.join(ARTWORK_DIR, f"{name}.png") for name in ARTWORK] + [ICON]:
+            if os.path.exists(path):
+                with open(path, "rb") as f:
+                    digest.update(f.read())
+        return f"{appid}:{digest.hexdigest()[:16]}"
+
     async def get_shortcut(self) -> dict:
+        stamp = self._artwork_stamp()
         return {
             "appid": self.settings["shortcut_appid"],
-            "artwork_applied": self.settings["shortcut_artwork"] is not None
-            and self.settings["shortcut_artwork"] == self.settings["shortcut_appid"],
+            "artwork_applied": stamp is not None and self.settings["shortcut_artwork"] == stamp,
         }
 
     async def set_shortcut(self, appid: int | None) -> None:
@@ -282,13 +299,28 @@ class Plugin:
         self._save_settings()
 
     async def set_artwork_applied(self, appid: int) -> None:
-        self.settings["shortcut_artwork"] = appid
-        self._save_settings()
+        if appid == self.settings["shortcut_appid"]:
+            self.settings["shortcut_artwork"] = self._artwork_stamp()
+            self._save_settings()
+
+    async def install_shortcut_icon(self, appid: int) -> str | None:
+        """Copy RustDesk's icon next to the shortcut's artwork and return its path. Steam's web
+        helper runs in a runtime container with its own /usr, so it cannot read the icon where
+        RustDesk installs it."""
+        pw = util.deck_user()
+        # The grid folder of the Steam user owning the shortcut: the one holding its artwork.
+        found = glob.glob(os.path.join(pw.pw_dir, ".local/share/Steam/userdata/*/config/grid", f"{int(appid)}p.png"))
+        if not found or not os.path.exists(ICON):
+            return None
+        dest = os.path.join(os.path.dirname(found[0]), f"{int(appid)}_icon.png")
+        shutil.copyfile(ICON, dest)
+        os.chown(dest, pw.pw_uid, pw.pw_gid)
+        return dest
 
     async def get_artwork(self) -> dict[str, str]:
         """Base64 PNGs for the shortcut: grid_p, grid_l, hero, logo."""
         art = {}
-        for name in ("grid_p", "grid_l", "hero", "logo"):
+        for name in ARTWORK:
             with open(os.path.join(ARTWORK_DIR, f"{name}.png"), "rb") as f:
                 art[name] = base64.b64encode(f.read()).decode()
         return art

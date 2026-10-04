@@ -66,4 +66,5 @@ export const setPermanentPassword = callable<[password: string], { ok: boolean; 
 export const getShortcut = callable<[], { appid: number | null; artwork_applied: boolean }>("get_shortcut");
 export const setArtworkApplied = callable<[appid: number], void>("set_artwork_applied");
 export const getArtwork = callable<[], Record<"grid_p" | "grid_l" | "hero" | "logo", string>>("get_artwork");
+export const installShortcutIcon = callable<[appid: number], string | null>("install_shortcut_icon");
 export const setShortcut = callable<[appid: number | null], void>("set_shortcut");
