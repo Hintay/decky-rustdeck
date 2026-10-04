@@ -124,6 +124,7 @@ export function RustDeckPage() {
     // Top and bottom padding clear the gamepad system bar and the footer hint bar drawn over the route.
     <Focusable
       ref={rootRef}
+      className="rd-root"
       flow-children="row"
       onButtonDown={onButtonDown}
       style={{ height: "100%", boxSizing: "border-box", padding: "40px 0", display: "flex", background: "#0e141b" }}

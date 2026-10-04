@@ -23,7 +23,7 @@ export function QuickAccessPanel() {
   const color = TONE_COLORS[tone];
 
   return (
-    <div ref={rootRef}>
+    <div ref={rootRef} className="rd-root">
       <PanelSection>
         <UiStyles />
         <PanelSectionRow>

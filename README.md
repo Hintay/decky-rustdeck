@@ -36,6 +36,7 @@ The two names differ by one letter:
 - **RustDesk's own window.** Opens in Game Mode through a non-Steam shortcut the plugin creates. The shortcut is hidden from the library, gets RustDesk artwork, and starts RustDesk in Steam's UI language.
 - **Starts with the Deck.** With remote access on, RustDesk comes back after a reboot. Reloading the plugin does not drop a session.
 - **Gamepad first.** Every page is navigable with the d-pad.
+- **Languages.** English, Simplified Chinese, Traditional Chinese and Japanese, following Steam's UI language.
 
 ## Requirements
 

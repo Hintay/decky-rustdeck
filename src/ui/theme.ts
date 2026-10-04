@@ -1,4 +1,5 @@
 import type { Status } from "../backend";
+import { FONT_FAMILY } from "../i18n";
 
 export const ACCENT = "#1a9fff";
 export const WARNING = "#f0a63a";
@@ -25,6 +26,7 @@ export function toneOf(status: Status | null): Tone {
 // built-in look, hence the doubled class selectors and !important on visual properties (Steam's
 // own "DialogButton:enabled" text color otherwise wins).
 export const UI_CSS = `
+.rd-root, .rd-root .rd-btn.rd-btn { font-family: ${FONT_FAMILY} !important; }
 .rd-btn.rd-btn { min-width: 0 !important; width: auto; padding: 0 !important; margin: 0; background: transparent !important; border: none !important; box-shadow: none; text-align: left; color: inherit !important; line-height: normal; }
 
 .rd-nav.rd-nav { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px !important; border-radius: 6px; font-size: 14px; color: #b8bcbf !important; }
