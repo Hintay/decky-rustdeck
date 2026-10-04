@@ -1,0 +1,11 @@
+{
+  "name": "RustDeck",
+  "author": "Hintay",
+  "flags": ["root"],
+  "api_version": 1,
+  "publish": {
+    "tags": ["remote-desktop", "rustdesk", "root"],
+    "description": "Run RustDesk in Game Mode: unattended remote access with a temporary or permanent password, your own ID/relay server, and mouse input through gamescope.",
+    "image": "https://opengraph.githubassets.com/1/rustdesk/rustdesk"
+  }
+}
