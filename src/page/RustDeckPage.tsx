@@ -3,7 +3,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { FaInfoCircle, FaNetworkWired, FaShieldAlt, FaSlidersH, FaTachometerAlt, FaTv } from "react-icons/fa";
 
 import { type RustdeskSettings, type Server, getRustdeskSettings, getServer, setRustdeskOption } from "../backend";
-import { usePolledStatus } from "../hooks";
+import { useCachedState, usePolledStatus } from "../hooks";
 import { type Key, t } from "../i18n";
 import { stateLabel } from "../labels";
 import { NAV_EVENT, PAGES, type PageId, getPendingPage } from "../nav";
@@ -50,8 +50,8 @@ function NavItem({
 
 function usePageCtx(): PageCtx | null {
   const [status, refreshStatus, setStatus] = usePolledStatus();
-  const [rs, setRs] = useState<RustdeskSettings | null>(null);
-  const [server, setServer] = useState<Server>({});
+  const [rs, setRs] = useCachedState<RustdeskSettings | null>("rs", null);
+  const [server, setServer] = useCachedState<Server>("server", {});
 
   const reload = async () => {
     setRs(await getRustdeskSettings());

@@ -60,7 +60,7 @@ export function groupCode(text: string, group = 3): string[] {
   return [s.slice(0, head), ...(s.slice(head).match(new RegExp(`.{${group}}`, "g")) ?? [])].filter(Boolean);
 }
 
-/** A code as keycaps: an ID in threes, a password character by character (group 1) or whole (0). */
+/** A code as keycaps: an ID in threes like RustDesk shows it, or whole (group 0) for a password. */
 export function Keycaps({ text, group = 3, size = 18 }: { text: string; group?: number; size?: number }) {
   const parts = groupCode(text, group);
   return (

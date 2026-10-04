@@ -1,5 +1,5 @@
 import { addEventListener, removeEventListener } from "@decky/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { type Password, type Status, getPassword, getStatus, installLatest, refreshPassword } from "./backend";
 import { t } from "./i18n";
@@ -7,8 +7,28 @@ import { toast } from "./toast";
 
 const POLL_MS = 2000;
 
+const cache = new Map<string, unknown>();
+
+/**
+ * useState whose last value outlives the component, so a page or the panel opened again starts
+ * from what it last showed instead of empty and then jumping as the data arrives.
+ */
+export function useCachedState<T>(key: string, initial: T): [T, (next: T | ((prev: T) => T)) => void] {
+  const [value, setValue] = useState<T>(() => (cache.has(key) ? (cache.get(key) as T) : initial));
+  const set = useCallback(
+    (next: T | ((prev: T) => T)) =>
+      setValue((prev) => {
+        const v = typeof next === "function" ? (next as (prev: T) => T)(prev) : next;
+        cache.set(key, v);
+        return v;
+      }),
+    [key],
+  );
+  return [value, set];
+}
+
 export function usePolledStatus(): [Status | null, () => void, (s: Status) => void] {
-  const [status, setStatus] = useState<Status | null>(null);
+  const [status, setStatus] = useCachedState<Status | null>("status", null);
   const poll = () =>
     getStatus()
       .then(setStatus)
@@ -22,7 +42,7 @@ export function usePolledStatus(): [Status | null, () => void, (s: Status) => vo
 }
 
 export function usePassword(status: Status | null): [Password | null, () => Promise<void>] {
-  const [password, setPassword] = useState<Password | null>(null);
+  const [password, setPassword] = useCachedState<Password | null>("password", null);
   const active = !!status?.active;
   useEffect(() => {
     if (active) getPassword().then(setPassword);

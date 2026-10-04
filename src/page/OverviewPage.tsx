@@ -59,21 +59,27 @@ export function OverviewPage({ ctx, go }: { ctx: PageCtx; go: (p: PageId) => voi
             <span className="rd-muted">{t("id")}</span>
             {status.id ? <Keycaps text={status.id} size={20} /> : <span style={{ color: "#5b6470", fontSize: 18 }}>— — —</span>}
           </div>
-          {password?.available ? (
+          {status.active && !password ? (
+            // Holds the password row's place until it loads, so the card does not grow under the user.
             <div style={{ display: "grid", gap: 4 }}>
               <span className="rd-muted">{t("temp_password")}</span>
-              <Focusable flow-children="row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {password.temporary ? (
-                  <>
-                    <Keycaps text={password.temporary} group={1} size={15} />
-                    <IconButton label={t("refresh")} onClick={refreshPassword}>
-                      <FaSyncAlt />
-                    </IconButton>
-                  </>
-                ) : (
-                  <span style={{ color: "#b8bcbf" }}>{t("temp_password_off")}</span>
-                )}
-              </Focusable>
+              <span style={{ height: 34 }} />
+            </div>
+          ) : password?.available ? (
+            <div style={{ display: "grid", gap: 4 }}>
+              <span className="rd-muted">{t("temp_password")}</span>
+              {/* No focus group without the refresh button: an empty one counts as the first row
+                  for useScrollEdgesOnFocus, so the real first row would no longer scroll to the top. */}
+              {password.temporary ? (
+                <Focusable flow-children="row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Keycaps text={password.temporary} group={0} size={18} />
+                  <IconButton label={t("refresh")} onClick={refreshPassword}>
+                    <FaSyncAlt />
+                  </IconButton>
+                </Focusable>
+              ) : (
+                <span style={{ color: "#b8bcbf" }}>{t("temp_password_off")}</span>
+              )}
             </div>
           ) : null}
         </div>
