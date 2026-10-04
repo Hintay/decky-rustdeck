@@ -82,6 +82,8 @@ pnpm run build
 pnpm run typecheck
 ```
 
+`pnpm run package` assembles the installable zip in `out/` from the current build. Pushing a `v*` tag (for example `v0.1.0`) runs CI and publishes that zip as a GitHub release, with notes generated from conventional commits.
+
 `scripts/deploy.sh [root@steamdeck.local]` builds the plugin and copies it to a Deck over SSH as root, restarting Decky. `scripts/make-artwork.py` regenerates the Steam artwork in `assets/artwork/` (needs Pillow).
 
 ## License
