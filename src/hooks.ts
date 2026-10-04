@@ -5,8 +5,6 @@ import { type Password, type Status, getPassword, getStatus, installLatest, refr
 import { t } from "./i18n";
 import { toast } from "./toast";
 
-const POLL_MS = 2000;
-
 const cache = new Map<string, unknown>();
 
 /**
@@ -27,18 +25,22 @@ export function useCachedState<T>(key: string, initial: T): [T, (next: T | ((pre
   return [value, set];
 }
 
-export function usePolledStatus(): [Status | null, () => void, (s: Status) => void] {
+/** Service status, pushed by the backend whenever it changes. */
+export function useStatus(): [Status | null, () => void, (s: Status) => void] {
   const [status, setStatus] = useCachedState<Status | null>("status", null);
-  const poll = () =>
+  const refresh = () =>
     getStatus()
       .then(setStatus)
       .catch((e) => console.error("RustDeck: get_status failed", e));
   useEffect(() => {
-    poll();
-    const timer = setInterval(poll, POLL_MS);
-    return () => clearInterval(timer);
+    // One read covers what changed while this view was closed; events cover the rest.
+    refresh();
+    const listener = addEventListener<[Status]>("status", setStatus);
+    return () => {
+      removeEventListener("status", listener);
+    };
   }, []);
-  return [status, poll, setStatus];
+  return [status, refresh, setStatus];
 }
 
 export function usePassword(status: Status | null): [Password | null, () => Promise<void>] {

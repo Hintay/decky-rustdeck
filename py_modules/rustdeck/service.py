@@ -1,5 +1,7 @@
 # The root `rustdesk --service`, run as a transient systemd unit: it survives plugin loader
 # restarts, and goes away with a reboot, after which the plugin starts it again if enabled.
+import os
+
 from . import paths, util
 from .util import run
 
@@ -9,7 +11,15 @@ _PROCESS_PATTERN = "^(" + "|".join(paths.RUSTDESK_EXES) + ") --"
 _SERVER_PATTERN = "^" + paths.RUSTDESK_EXES[1] + " --server"
 
 
+# A unit's cgroup exists exactly while it has processes, so a stat answers "is it running"
+# without starting a `systemctl` process every few seconds.
+_SLICE = "/sys/fs/cgroup/system.slice"
+_CGROUP = f"{_SLICE}/{paths.SERVICE_UNIT}.service"
+
+
 async def is_active() -> bool:
+    if os.path.isdir(_SLICE):
+        return os.path.isdir(_CGROUP)
     return (await run("systemctl", "is-active", "--quiet", paths.SERVICE_UNIT)).ok
 
 

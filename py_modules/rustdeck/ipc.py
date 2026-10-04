@@ -28,14 +28,18 @@ class Ipc:
         self.path = f"/tmp/RustDesk-{uid}/ipc"
 
     async def _request(self, data: dict, reply_tag: str | None):
-        reader, writer = await asyncio.wait_for(asyncio.open_unix_connection(self.path), TIMEOUT)
+        # One deadline for the whole exchange: the server may send other frames before the reply.
+        return await asyncio.wait_for(self._exchange(data, reply_tag), TIMEOUT)
+
+    async def _exchange(self, data: dict, reply_tag: str | None):
+        reader, writer = await asyncio.open_unix_connection(self.path)
         try:
             writer.write(_encode(json.dumps(data).encode()))
             await writer.drain()
             if reply_tag is None:
                 return None
             while True:
-                msg = await asyncio.wait_for(_read_frame(reader), TIMEOUT)
+                msg = await _read_frame(reader)
                 if msg.get("t") == reply_tag:
                     return msg.get("c")
         finally:

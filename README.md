@@ -86,6 +86,7 @@ The plugin installs `rustdesk-unattended-wayland` from the `deck-*` releases of 
 pnpm install
 pnpm run build
 pnpm run typecheck
+python3 -m unittest discover -s tests -t .
 ```
 
 `pnpm run package` assembles the installable zip in `out/` from the current build. Pushing a `v*` tag (for example `v0.1.0`) runs CI and publishes that zip as a GitHub release, with notes generated from conventional commits.

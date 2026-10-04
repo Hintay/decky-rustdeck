@@ -158,14 +158,23 @@ async def install(rel: Release, on_progress: Callable[[int, int], object] | None
         await _unpack(deb, root)
         _shape_extension(root)
 
+        # The previous build stays next to the new one until the new one is merged, so a failed
+        # update puts it back instead of leaving RustDesk missing.
+        previous = paths.EXT_DIR + ".previous"
         await run("systemd-sysext", "unmerge", timeout=60)
+        shutil.rmtree(previous, ignore_errors=True)
         if os.path.isdir(paths.EXT_DIR):
-            shutil.rmtree(paths.EXT_DIR)
+            os.rename(paths.EXT_DIR, previous)
         os.rename(root, paths.EXT_DIR)
         _link_extension()
         res = await run("systemd-sysext", "merge", timeout=60)
         if not res.ok:
+            shutil.rmtree(paths.EXT_DIR, ignore_errors=True)
+            if os.path.isdir(previous):
+                os.rename(previous, paths.EXT_DIR)
+                await run("systemd-sysext", "merge", timeout=60)
             raise RuntimeError(f"systemd-sysext merge failed: {res.err.strip()}")
+        shutil.rmtree(previous, ignore_errors=True)
         await run("systemctl", "daemon-reload")
         with open(paths.INSTALLED_JSON, "w") as f:
             json.dump({**asdict(rel), "installed_at": int(time.time())}, f)

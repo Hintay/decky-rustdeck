@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { FaChevronRight, FaPowerOff, FaSyncAlt, FaUnlink } from "react-icons/fa";
 
 import { disconnectAll, setEnabled } from "./backend";
-import { usePassword, usePolledStatus } from "./hooks";
+import { usePassword, useStatus } from "./hooks";
 import { t } from "./i18n";
 import { stateLabel, verificationLabel } from "./labels";
 import { openPage } from "./nav";
@@ -13,7 +13,7 @@ import { TONE_COLORS, toneOf } from "./ui/theme";
 import { useFocusRecovery } from "./ui/useFocusRecovery";
 
 export function QuickAccessPanel() {
-  const [status, refresh, setStatus] = usePolledStatus();
+  const [status, refresh, setStatus] = useStatus();
   const [password, refreshPassword] = usePassword(status);
   const rootRef = useRef<HTMLDivElement>(null);
   useFocusRecovery(rootRef);

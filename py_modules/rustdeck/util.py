@@ -57,6 +57,11 @@ async def run(*args: str, timeout: float = 60, env: dict[str, str] | None = None
         await proc.wait()
         log.warning("timed out after %ss: %s", timeout, " ".join(args))
         return Result(-1, "", "timeout")
+    except asyncio.CancelledError:
+        # Do not leave the program running behind a cancelled caller (e.g. the plugin unloading).
+        if proc.returncode is None:
+            proc.kill()
+        raise
     res = Result(proc.returncode or 0, out.decode(errors="replace"), err.decode(errors="replace"))
     if not res.ok:
         log.debug("exit %d: %s: %s", res.code, " ".join(args), res.err.strip()[:300])

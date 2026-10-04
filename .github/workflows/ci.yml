@@ -40,6 +40,9 @@ jobs:
       - name: Check Python syntax
         run: python3 -m py_compile main.py py_modules/rustdeck/*.py
 
+      - name: Test backend
+        run: python3 -m unittest discover -s tests -t . -v
+
       - name: Check whitespace
         run: git diff --check $(git hash-object -t tree /dev/null) HEAD
 

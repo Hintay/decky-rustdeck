@@ -1,8 +1,13 @@
 # RustDesk's own CLI. Settings changes need root and an installed (under /usr) binary.
+import asyncio
+
 from . import paths
 from .util import run
 
 SERVER_OPTIONS = ("custom-rendezvous-server", "relay-server", "api-server", "key")
+
+# Each CLI call starts a full RustDesk process, so only a few run at once.
+_CLI_SLOTS = asyncio.Semaphore(4)
 
 # Options the settings page may change. "approve-mode" is left out on purpose: click-to-accept
 # needs RustDesk's connection window, which gamescope never shows, so a session would hang.
@@ -33,8 +38,15 @@ async def get_id() -> str | None:
 
 
 async def get_option(name: str) -> str:
-    res = await run(paths.RUSTDESK, "--option", name, timeout=15)
+    async with _CLI_SLOTS:
+        res = await run(paths.RUSTDESK, "--option", name, timeout=15)
     return res.out.strip() if res.ok else ""
+
+
+async def get_options(names) -> dict[str, str]:
+    """Several options through the CLI, for when no --server answers over IPC."""
+    names = list(names)
+    return dict(zip(names, await asyncio.gather(*(get_option(n) for n in names))))
 
 
 async def set_option(name: str, value: str) -> bool:
@@ -44,7 +56,3 @@ async def set_option(name: str, value: str) -> bool:
 async def apply_config(config: str) -> bool:
     """Apply a server configuration string as exported by RustDesk (host, relay, api, key)."""
     return (await run(paths.RUSTDESK, "--config", config, timeout=15)).ok
-
-
-async def get_server() -> dict[str, str]:
-    return {name: await get_option(name) for name in SERVER_OPTIONS}
